@@ -10,7 +10,7 @@ resource "aws_instance" "example" {
   user_data = <<-EOF
               #!/bin/bash
               echo "Hello, Wolrd" > index.html
-              nohup busybox httpd -f -p 8080 &
+              nohup busybox httpd -f -p ${var.web-server-port} &
               EOF
 
 
@@ -25,9 +25,20 @@ resource "aws_security_group" "instance" {
   name = "fist-security-group"
 
   ingress {
-    from_port = 8080
-    to_port = 8080
+    from_port = var.web-server-port
+    to_port = var.web-server-port
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+variable "web-server-port" {
+  default = 8080
+  description = "Web Server port"
+  type = number
+}
+
+output "public-ip" {
+  description = "EC2 Public IP"
+  value = aws_instance.example.public_ip
 }
