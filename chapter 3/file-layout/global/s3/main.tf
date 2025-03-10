@@ -5,9 +5,9 @@ provider "aws" {
 resource "aws_s3_bucket" "terraform_state" {
     bucket = "terraform-state-example-buckete"
 
-    # lifecycle {
-    #   prevent_destroy = true
-    # }
+    lifecycle {
+      prevent_destroy = true
+    }
   
 }
 
@@ -48,7 +48,12 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
-resource "aws_instance" "ec2_example" {
-     ami = "ami-0fb653ca2d3203ac1"
-     instance_type = terraform.workspace == "default" ?  "t2.medium" : "t2.micro"
+terraform {
+  backend "s3" {
+    bucket = "terraform-state-example-buckete"
+    key = "globals/s3/terraform.tfstate"
+    region = "us-east-2"
+    dynamodb_table = "terraform-state-example-buckete-locks"
+    encrypt = true
+  }
 }
